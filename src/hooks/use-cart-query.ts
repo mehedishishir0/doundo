@@ -4,6 +4,13 @@ import { cartService } from "@/lib/api/cart-service";
 import { Cart, CartItem } from "@/lib/types/ecommerce";
 import { toast } from "sonner";
 import { AxiosError } from "axios";
+import {
+  addGuestCartItems,
+  clearGuestCart,
+  getGuestCart,
+  removeGuestCartItem,
+  updateGuestCartItem,
+} from "@/lib/utils/guest-cart";
 
 // Query keys
 export const cartKeys = {
@@ -17,15 +24,15 @@ export const cartKeys = {
 export const useCartQuery = () => {
   const { data: session } = useSession();
   const userId = session?.user?.id;
+  const queryKey = cartKeys.user(userId || "guest");
 
   return useQuery({
-    queryKey: cartKeys.user(userId || ""),
+    queryKey,
     queryFn: async () => {
-      if (!userId) return null;
+      if (!userId) return getGuestCart();
       const response = await cartService.getCart(userId);
       return response.success ? response.data : null;
     },
-    enabled: !!userId,
     staleTime: 1000 * 60 * 2, // 2 minutes
   });
 };
@@ -46,12 +53,22 @@ export const useAddToCart = () => {
         size?: string;
       }[]
     ) => {
-      if (!session?.user?.id) throw new Error("User not authenticated");
+      if (!session?.user?.id) {
+        return {
+          success: true,
+          message: "Item added to cart",
+          data: addGuestCartItems(items),
+        };
+      }
+
       return cartService.addToCart(session.user.id, items);
     },
     onSuccess: (response) => {
-      if (response.success && session?.user?.id) {
-        queryClient.setQueryData(cartKeys.user(session.user.id), response.data);
+      if (response.success) {
+        queryClient.setQueryData(
+          cartKeys.user(session?.user?.id || "guest"),
+          response.data
+        );
         toast.success("Item added to cart");
       }
     },
@@ -82,7 +99,13 @@ export const useUpdateCartQuantity = () => {
       color?: string;
       size?: string;
     }) => {
-      if (!session?.user?.id) throw new Error("User not authenticated");
+      if (!session?.user?.id) {
+        return {
+          success: true,
+          message: "Cart updated",
+          data: updateGuestCartItem(productId, quantity, color, size),
+        };
+      }
 
       // Get current cart from cache
       const currentCart = queryClient.getQueryData<Cart>(
@@ -112,18 +135,19 @@ export const useUpdateCartQuantity = () => {
       return cartService.updateCart(session.user.id, updatedProductIds);
     },
     onSuccess: (response) => {
-      if (response.success && session?.user?.id) {
-        queryClient.setQueryData(cartKeys.user(session.user.id), response.data);
+      if (response.success) {
+        queryClient.setQueryData(
+          cartKeys.user(session?.user?.id || "guest"),
+          response.data
+        );
       }
     },
     onError: (error: AxiosError<{ message: string }>) => {
       console.error("Failed to update cart quantity:", error);
       // Refetch to ensure UI is in sync
-      if (session?.user?.id) {
-        queryClient.invalidateQueries({
-          queryKey: cartKeys.user(session.user.id),
-        });
-      }
+      queryClient.invalidateQueries({
+        queryKey: cartKeys.user(session?.user?.id || "guest"),
+      });
     },
   });
 };
@@ -139,17 +163,30 @@ export const useRemoveFromCart = () => {
     mutationFn: async ({
       cartId,
       productId,
+      color,
+      size,
     }: {
       cartId: string;
       productId: string;
       color?: string;
       size?: string;
     }) => {
+      if (!session?.user?.id) {
+        return {
+          success: true,
+          message: "Item removed from cart",
+          data: removeGuestCartItem(productId, color, size),
+        };
+      }
+
       return cartService.removeFromCart(cartId, productId);
     },
     onSuccess: (response) => {
-      if (response.success && session?.user?.id) {
-        queryClient.setQueryData(cartKeys.user(session.user.id), response.data);
+      if (response.success) {
+        queryClient.setQueryData(
+          cartKeys.user(session?.user?.id || "guest"),
+          response.data
+        );
         toast.success(response.message || "Item removed from cart");
       }
     },
@@ -168,12 +205,22 @@ export const useClearCart = () => {
 
   return useMutation({
     mutationFn: async () => {
-      if (!session?.user?.id) throw new Error("User not authenticated");
+      if (!session?.user?.id) {
+        return {
+          success: true,
+          message: "Cart cleared",
+          data: clearGuestCart(),
+        };
+      }
+
       return cartService.updateCart(session.user.id, []);
     },
     onSuccess: (response) => {
-      if (response.success && session?.user?.id) {
-        queryClient.setQueryData(cartKeys.user(session.user.id), response.data);
+      if (response.success) {
+        queryClient.setQueryData(
+          cartKeys.user(session?.user?.id || "guest"),
+          response.data
+        );
         toast.success("Cart cleared");
       }
     },

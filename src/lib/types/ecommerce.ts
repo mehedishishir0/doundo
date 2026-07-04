@@ -70,3 +70,28 @@ export interface CreatePaymentResponse {
   message: string;
   data: PaymentData;
 }
+
+export interface ShippingAddress {
+  street: string;
+  city: string;
+  province: string;
+  postalCode: string;
+  country: string;
+}
+
+export interface CreatePaymentIntentRequest {
+  userId: string;
+  shippingAddress: ShippingAddress;
+  currency?: "usd" | "cad";
+}
+
+export interface PaymentIntentData {
+  clientSecret: string;
+  paymentId: string;
+}
+
+export interface CreatePaymentIntentResponse {
+  success: boolean;
+  message: string;
+  data: PaymentIntentData;
+}

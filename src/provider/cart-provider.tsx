@@ -11,21 +11,21 @@ import { Cart } from "../lib/types/ecommerce";
 import { cartService } from "../lib/api/cart-service";
 import { useSession } from "next-auth/react";
 import { toast } from "sonner";
+import {
+  addGuestCartItems,
+  CartItemInputWithProduct,
+  clearGuestCart,
+  getGuestCart,
+  removeGuestCartItem,
+  updateGuestCartItem,
+} from "@/lib/utils/guest-cart";
 
 
 interface CartContextType {
   cart: Cart | null;
   loading: boolean;
   refreshCart: () => Promise<void>;
-  addToCart: (
-    items: {
-      productId: string;
-      quantity: number;
-      color?: string;
-      size?: string;
-    }[],
-    userId: string
-  ) => Promise<void>;
+  addToCart: (items: CartItemInputWithProduct[], userId?: string) => Promise<void>;
   updateQuantity: (
     productId: string,
     quantity: number,
@@ -48,11 +48,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(false);
   const { data: session } = useSession();
-  console.log(session?.user.id);
 
   const refreshCart = useCallback(async () => {
     if (!session?.user?.id) {
-      setCart(null);
+      setCart(getGuestCart());
       return;
     }
     setLoading(true);
@@ -72,18 +71,34 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
     refreshCart();
   }, [refreshCart]);
 
+  useEffect(() => {
+    if (session?.user?.id) return;
+
+    const handleGuestCartUpdate = () => setCart(getGuestCart());
+    window.addEventListener("guest-cart-updated", handleGuestCartUpdate);
+
+    return () => {
+      window.removeEventListener("guest-cart-updated", handleGuestCartUpdate);
+    };
+  }, [session?.user?.id]);
+
   const addToCart = useCallback(
-    async (
-      items: {
-        productId: string;
-        quantity: number;
-        color?: string;
-        size?: string;
-      }[],
-      userId: string
-    ) => {
+    async (items: CartItemInputWithProduct[], userId?: string) => {
       try {
-        const response = await cartService.addToCart(userId, items);
+        const effectiveUserId = userId || session?.user?.id;
+
+        if (!effectiveUserId) {
+          setCart(addGuestCartItems(items));
+          return;
+        }
+
+        const productItems = items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          color: item.color,
+          size: item.size,
+        }));
+        const response = await cartService.addToCart(effectiveUserId, productItems);
         if (response.success) {
           setCart(response.data);
         }
@@ -92,7 +107,7 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
         throw error;
       }
     },
-    []
+    [session?.user?.id]
   );
 
   const updateQuantity = useCallback(
@@ -102,7 +117,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
       color?: string,
       size?: string
     ) => {
-      if (!session?.user?.id || !cart) return;
+      if (!cart) return;
+
+      if (!session?.user?.id) {
+        setCart(updateGuestCartItem(productId, quantity, color, size));
+        return;
+      }
 
       try {
         // Build updated productIds array
@@ -141,7 +161,13 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const removeFromCart = useCallback(
     async (productId: string, color?: string, size?: string) => {
-      if (!session?.user?.id || !cart) return;
+      if (!cart) return;
+
+      if (!session?.user?.id) {
+        setCart(removeGuestCartItem(productId, color, size));
+        toast.success("Item removed from cart");
+        return;
+      }
 
       try {
         // Note: The specific DELETE endpoint as currently implemented in the backend
@@ -160,7 +186,11 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const clearCart = useCallback(async () => {
-    if (!session?.user?.id) return;
+    if (!session?.user?.id) {
+      setCart(clearGuestCart());
+      return;
+    }
+
     try {
       const response = await cartService.updateCart(session.user.id, []);
       if (response.success) {

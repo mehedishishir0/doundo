@@ -1,12 +1,12 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import ProductNavbar from "@/components/shared/ProductNavbar";
 import ProductFooter from "@/components/shared/ProductFooter";
 import CartItem from "@/components/shared/CartItem";
 import OrderSummary from "@/components/shared/OrderSummary";
-import { usePayment } from "@/hooks/use-payment";
 import {
   useCartQuery,
   useUpdateCartQuantity,
@@ -16,6 +16,8 @@ import { useCartLogic, getCartItemKey } from "@/hooks/use-cart-logic";
 import CartSkeleton from "@/components/shared/CartSkeleton";
 
 export default function CartPage() {
+  const router = useRouter();
+
   // Fetch cart data
   const { data: cart, isLoading } = useCartQuery();
 
@@ -36,24 +38,15 @@ export default function CartPage() {
     onRemoveFromCart: removeFromCart,
   });
 
-  // Payment
-  const { mutate: createPayment, isPending: isCheckoutLoading } = usePayment();
-
   // Constants for shipping and tax
   const SHIPPING_ESTIMATE = 5;
   const TAX_RATE = 0.13;
 
   const tax = subtotal * TAX_RATE;
-  const totalAmount = subtotal + SHIPPING_ESTIMATE + tax;
 
   const handleCheckout = () => {
-    if (!cart) return;
-
-    createPayment({
-      userId: cart.userId,
-      totalAmount: totalAmount,
-      itemIds: [cart._id],
-    });
+    if (!cart || items.length === 0) return;
+    router.push("/checkout");
   };
 
   if (isLoading) {
@@ -145,7 +138,6 @@ export default function CartPage() {
               shipping={SHIPPING_ESTIMATE}
               tax={tax}
               onCheckout={handleCheckout}
-              isCheckoutLoading={isCheckoutLoading}
               isDisabled={items.length === 0}
             />
           </div>

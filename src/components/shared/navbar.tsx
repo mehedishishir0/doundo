@@ -117,6 +117,16 @@ export default function Navbar() {
                 <Search className="h-5 w-5 sm:h-8 sm:w-8 text-primary" />
               </Button>
 
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => signOut()}
+                  className="relative bg-transparent hover:bg-white/20 transition-colors"
+                  aria-label="Search"
+                >
+                 Logout
+                </Button>
+
               {/* Cart Button */}
               <Link href="/cart" className="relative">
                 <Button
@@ -142,97 +152,91 @@ export default function Navbar() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="relative bg-transparent hover:bg-white/20 transition-colors"
+                        className="relative h-10 w-10 rounded-full bg-primary hover:bg-primary/90 transition-colors"
                         aria-label="User menu"
                       >
                         {profile?.imageLink ? (
                           <Image
                             src={profile.imageLink}
                             alt={getFullName()}
-                            width={32}
-                            height={32}
-                            className="rounded-full object-cover border-2 border-primary"
+                            width={40}
+                            height={40}
+                            className="h-10 w-10 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center">
-                            <span className="text-white text-sm font-semibold">
-                              {getUserInitials()}
-                            </span>
-                          </div>
+                          <span className="text-sm font-bold text-white">
+                            {getUserInitials()}
+                          </span>
                         )}
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-64">
-                      <div className="flex items-center space-x-3 p-3">
+                    <DropdownMenuContent
+                      align="end"
+                      sideOffset={12}
+                      className="w-64 overflow-hidden rounded-lg border border-[#EFEFEF] bg-white p-0 shadow-[0_10px_30px_rgba(0,0,0,0.14)]"
+                    >
+                      <div className="flex items-center gap-3 p-4">
                         {profile?.imageLink ? (
                           <Image
                             src={profile.imageLink}
                             alt={getFullName()}
-                            width={40}
-                            height={40}
-                            className="rounded-full object-cover border-2 border-primary"
+                            width={44}
+                            height={44}
+                            className="h-11 w-11 rounded-full object-cover"
                           />
                         ) : (
-                          <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center">
-                            <span className="text-white font-semibold">
+                          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary">
+                            <span className="text-sm font-bold text-white">
                               {getUserInitials()}
                             </span>
                           </div>
                         )}
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold truncate">
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-semibold text-[#111111]">
                             {loading ? "Loading..." : getFullName()}
                           </p>
-                          <p className="text-xs text-muted-foreground truncate">
+                          <p className="truncate text-xs text-[#333333]">
                             {loading
                               ? "Loading..."
                               : profile?.email ||
                                 session.user?.email ||
                                 "No email"}
                           </p>
-                          {profile?.role && (
-                            <p className="text-xs text-muted-foreground capitalize">
-                              {profile.role}
-                            </p>
-                          )}
+                          <p className="truncate text-xs text-[#333333]">
+                            {profile?.role || "User"}
+                          </p>
                         </div>
                       </div>
-                      <DropdownMenuSeparator />
+                      <DropdownMenuSeparator className="m-0 bg-[#EFEFEF]" />
                       <DropdownMenuItem asChild>
                         {profile?.role === "admin" ? (
                           <Link
                             href="https://admin.doundogames.com/"
-                            className="cursor-pointer"
+                            className="h-10 cursor-pointer px-4 text-sm text-[#111111] focus:bg-[#F7F7F7]"
                             target="_blank"
                           >
                             Dashboard
                           </Link>
                         ) : (
-                          <Link href="/profile" className="cursor-pointer">
+                          <Link
+                            href="/profile"
+                            className="h-10 cursor-pointer px-4 text-sm text-[#111111] focus:bg-[#F7F7F7]"
+                          >
                             Account Settings
                           </Link>
                         )}
                       </DropdownMenuItem>
-                      <DropdownMenuSeparator />
+                      <DropdownMenuSeparator className="m-0 bg-[#EFEFEF]" />
                       <DropdownMenuItem
-                        className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50"
+                        className="h-10 cursor-pointer px-4 text-sm text-red-600 focus:bg-red-50 focus:text-red-600"
                         onClick={() => signOut()}
                       >
-                        <LogOut className="mr-2 h-4 w-4" />
+                        <LogOut className="mr-3 h-4 w-4" />
                         Log Out
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : (
-                  <Link href="/login">
-                    <Button
-                      size="sm"
-                      className="bg-primary hover:bg-[#D63E1F] text-white font-medium"
-                    >
-                      Log In
-                    </Button>
-                  </Link>
-                )}
+                ) : null}
               </div>
 
               {/* Mobile menu button */}
@@ -344,9 +348,8 @@ export default function Navbar() {
                       </nav>
 
                       {/* Mobile Footer Actions */}
-                      <div className="border-t p-6 space-y-3">
-                        {status === "authenticated" && session ? (
-                          <>
+                      {status === "authenticated" && session && (
+                        <div className="border-t p-6 space-y-3">
                             <Button
                               variant="outline"
                               className="w-full justify-start"
@@ -377,21 +380,8 @@ export default function Navbar() {
                               <LogOut className="mr-2 h-4 w-4" />
                               Log Out
                             </Button>
-                          </>
-                        ) : (
-                          <Button
-                            className="w-full bg-primary hover:bg-[#D63E1F] text-white"
-                            asChild
-                          >
-                            <Link
-                              href="/login"
-                              onClick={() => setIsOpen(false)}
-                            >
-                              Log In
-                            </Link>
-                          </Button>
-                        )}
-                      </div>
+                        </div>
+                      )}
                     </div>
                   </SheetContent>
                 </Sheet>
