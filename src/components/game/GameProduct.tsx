@@ -126,11 +126,8 @@ const GameProduct = () => {
     <section className=" my-10 md:my-16 ">
       <div>
         <div className="container mx-auto w-[95%] md:w-full ">
-          <h2 className="text-xl md:text-2xl xl:text-[48px]  text-primary-foreground leading-[150%] font-semibold mb-8 text-center">
-            Play, Explore & Discover <br /> Your Next Adventure
-          </h2>
-
-          <div className="flex flex-wrap justify-center gap-5">
+        
+          <div className="flex flex-wrap  gap-5">
             {(selectedProduct ? products : products.slice(0, 3)).map(
               (product) => (
                 <ProductCard

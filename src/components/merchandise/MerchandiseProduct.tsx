@@ -1,11 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 
-import { Button } from "../ui/button";
-
 import { Product } from "@/lib/types/ecommerce";
 import { productService } from "@/lib/api/product-service";
-import { MoveRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useCart } from "@/provider/cart-provider";
 import { useSession } from "next-auth/react";
@@ -13,16 +10,32 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import ProductCard from "../shared/product-card";
 
+// Chevron Icon Components for Dropdown
+const ChevronDownIcon = () => (
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ml-1 h-4 w-4">
+    <path d="m6 9 6 6 6-6"/>
+  </svg>
+);
+
 const MerchandiseProduct = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedProduct, setSelectedProduct] = useState(false);
   const [addingToCartId, setAddingToCartId] = useState<string | null>(null);
 
-  const { addToCart } = useCart();
-  const { data: session } = useSession();
-  const router = useRouter();
+  // Filter State (Static tracking for UI)
+  const [selectedCategory, setSelectedCategory] = useState("ALL");
+
+  // Static Categories matching your image
+  const categories = [
+    { id: "ALL", label: "ALL", count: 16 },
+    { id: "APPAREL", label: "APPAREL", count: 4 },
+    { id: "ACCESSORIES", label: "ACCESSORIES", count: 3 },
+    { id: "PRINTS_POSTERS", label: "PRINTS & POSTERS", count: 3 },
+    { id: "STATIONERY", label: "STATIONERY", count: 2 },
+    { id: "HOME_DECOR", label: "HOME & DECOR", count: 2 },
+    { id: "COLLECTIBLES", label: "COLLECTIBLES", count: 2 },
+  ];
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -80,6 +93,10 @@ const MerchandiseProduct = () => {
     }
   };
 
+  const { addToCart } = useCart();
+  const { data: session } = useSession();
+  const router = useRouter();
+
   if (loading) {
     return (
       <section className="my-10 md:my-16">
@@ -124,17 +141,67 @@ const MerchandiseProduct = () => {
       </section>
     );
   }
+
   return (
     <section className="my-10 md:my-16">
-      <div className="container mx-auto">
-        <h2 className="text-lg md:text-2xl xl:text-[48px] text-primary-foreground leading-[150%] font-semibold mb-8 text-center">
-          ALL Merchandise Product
-        </h2>
+      <div className="container mx-auto px-4">
+        
+        {/* --- TOP FILTER & SORT BAR (Image Match) --- */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-gray-100 pb-5 mb-8">
+          
+          {/* Filter Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {categories.map((cat) => {
+              const isActive = selectedCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold uppercase tracking-wider transition-all border ${
+                    isActive
+                      ? "bg-[#141412] text-white border-[#141412]"
+                      : "bg-[#FAF8F5] text-[#141412] border-[#EAE6DF] hover:bg-[#EAE6DF]"
+                  }`}
+                >
+                  <span>{cat.label}</span>
+                  <span className={`text-[10px] ${isActive ? "text-gray-400" : "text-gray-500"}`}>
+                    {cat.count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Sort Dropdown */}
+          <div className="flex items-center gap-4 self-end md:self-auto text-sm">
+            <span className="text-gray-500">
+              <strong className="text-gray-900 font-medium">16</strong> products
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">SORT</span>
+              <div className="relative inline-block">
+                <select 
+                  className="appearance-none bg-transparent pr-8 pl-1 py-1 font-medium text-gray-900 focus:outline-none cursor-pointer border-b border-transparent hover:border-gray-400 transition-colors"
+                  defaultValue="featured"
+                >
+                  <option value="featured">Featured</option>
+                  <option value="low-to-high">Price: Low to High</option>
+                  <option value="high-to-low">Price: High to Low</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center text-gray-900">
+                  <ChevronDownIcon />
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        {/* --- END OF BAR --- */}
 
         {products?.length === 0 ? (
           <p className="text-center text-gray-500 text-lg">You have no data</p>
         ) : (
-          <div className="flex flex-wrap items-center justify-center gap-5">
+          <div className="flex flex-wrap items-center gap-5">
             {products.map((product) => (
               <ProductCard
                 key={product._id}

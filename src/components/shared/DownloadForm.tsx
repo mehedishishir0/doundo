@@ -70,8 +70,8 @@ const DownloadForm = ({ gameName }: { gameName: string }) => {
   return (
     <section className="w-full flex justify-center my-10 lg:my-20 lg:px-8 rounded-2xl">
       <div className="w-full lg:max-w-2xl rounded-xl bg-secondary p-6 shadow-sm">
-        <h2 className="text-center text-lg font-semibold mb-6">
-          Print and play
+        <h2 className="text-center text-gray-600 text-lg font-semibold mb-6">
+          EMAIL FOR DOWNLOAD 
         </h2>
 
         <Form {...form}>
@@ -82,11 +82,11 @@ const DownloadForm = ({ gameName }: { gameName: string }) => {
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel className="text-gray-600">Name</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your name"
-                      className="rounded-full text-sm   bg-white outline-none lg:text-base"
+                      className=" border border-gray-400 outline-none shadow-none h-10   lg:text-base"
                       {...field}
                     />
                   </FormControl>
@@ -101,11 +101,11 @@ const DownloadForm = ({ gameName }: { gameName: string }) => {
               name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Email</FormLabel>
+                  <FormLabel className="text-gray-600">Email</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your email"
-                      className="rounded-full outline-none text-sm bg-white lg:text-base"
+                      className=" border border-gray-400 outline-none shadow-none h-10   lg:text-base"
                       {...field}
                     />
                   </FormControl>
