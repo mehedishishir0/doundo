@@ -9,6 +9,10 @@ import MediaSection from "@/components/shared/MediaSection";
 // import ProductFooter from "@/components/shared/ProductFooter"
 import { Product } from "@/lib/types/ecommerce";
 import { productService } from "@/lib/api/product-service";
+import RightToLeftMarquee from "@/components/shared/LeftToRightMarquee";
+import GameRulesSection from "../_components/GameRulesSection";
+import BoardAnatomySection from "../_components/BoardAnatomySection";
+import PressReactionsSection from "../_components/PressReactionsSection";
 
 export default function ProductPage() {
   const params = useParams();
@@ -68,13 +72,15 @@ export default function ProductPage() {
 
       {/* <ProductNavbar /> */}
 
-      <main className="relative z-10 lg:mb-20 container mx-auto">
+      <main>
         <ProductHero product={product} />
-        <ProductDetails product={product} />
+        <RightToLeftMarquee />
+        <GameRulesSection />
+        <BoardAnatomySection />
         <MediaSection videoLink={product.videoLink} />
+        <ProductDetails product={product} />
+        <PressReactionsSection/>
       </main>
-
-      {/* <ProductFooter /> */}
     </div>
   );
 }

@@ -1,13 +1,13 @@
 import React from "react";
 
 
-const OurStory = () => {
+const Hero1 = ({image, title, subtitle, description, text  }: {image: string, title: string, subtitle: string, description: string, text: string}) => {
   return (
     <div className="bg-[#FAF6EE] font-sans antialiased text-[#2D2D2D]">
       <section
         className="text-white py-20 px-4 text-center relative overflow-hidden"
         style={{
-          backgroundImage: "url('/hero.jpeg')",
+          backgroundImage: `url('${image}')`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
@@ -17,17 +17,16 @@ const OurStory = () => {
       >
         <div className="max-w-3xl mx-auto">
           <span className="text-[10px] uppercase tracking-[0.2em] text-[#C4A484] block mb-3 font-semibold">
-            ABOUT US
+            {title}
           </span>
           <h1 className="text-4xl md:text-5xl font-light tracking-tight mb-2">
-            Our Story
+            {subtitle}
           </h1>
           <h2 className="text-4xl md:text-5xl font-bold text-[#E28755] tracking-tight mb-6">
-            So Far.
+            {text}
           </h2>
           <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto font-light leading-relaxed">
-            Meet the team and learn about our mission to build a universe of
-            games around thirteen symbols.
+            {description}
           </p>
         </div>
       </section>
@@ -37,4 +36,4 @@ const OurStory = () => {
   );
 };
 
-export default OurStory;
+export default Hero1;

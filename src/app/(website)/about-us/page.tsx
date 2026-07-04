@@ -1,13 +1,19 @@
 import MakingOfSection from "@/components/about/MakingOfSection";
 import MeetOurTeam from "@/components/about/MeetOurTeam";
 import OurMission from "@/components/about/OurMission";
-import OurStory from "@/components/about/OurStory";
 import GetInTouch from "@/components/shared/GetInTouch";
+import Hero1 from "@/components/shared/Hero1";
 
 const page = () => {
   return (
     <div>
-      <OurStory />
+      <Hero1 
+        image="/hero.jpeg"
+        title="ABOUT US"
+        subtitle="Our Story"
+        description="Meet the team and learn about our mission to build a universe of games around thirteen symbols."
+        text="So Far."
+      />
       <OurMission />
       <MeetOurTeam />
       <MakingOfSection />
